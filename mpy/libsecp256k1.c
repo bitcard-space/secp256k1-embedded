@@ -11,6 +11,7 @@
 #include "py/builtin.h"
 #include "py/gc.h"
 
+#define STATIC static
 #define malloc(b) gc_alloc((b), false)
 #define free gc_free
 
@@ -30,8 +31,8 @@ void maybe_init_ctx(){
     if(ctx != NULL){
         return;
     }
-    // ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
-    ctx = secp256k1_context_preallocated_create((void *)preallocated_ctx, SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+    ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+    // ctx = secp256k1_context_preallocated_create((void *)preallocated_ctx, SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 }
 
 // randomize context using 32-byte seed
@@ -71,7 +72,7 @@ STATIC mp_obj_t usecp256k1_ec_pubkey_create(const mp_obj_t arg){
     vstr_init_len(&vstr, 64);
     memcpy((byte*)vstr.buf, pubkey.data, 64);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ec_pubkey_create_obj, usecp256k1_ec_pubkey_create);
@@ -110,7 +111,7 @@ STATIC mp_obj_t usecp256k1_ec_pubkey_parse(const mp_obj_t arg){
     vstr_init_len(&vstr, 64);
     memcpy((byte*)vstr.buf, pubkey.data, 64);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ec_pubkey_parse_obj, usecp256k1_ec_pubkey_parse);
@@ -140,7 +141,7 @@ STATIC mp_obj_t usecp256k1_ec_pubkey_serialize(mp_uint_t n_args, const mp_obj_t 
     vstr_t vstr;
     vstr_init_len(&vstr, len);
     memcpy((byte*)vstr.buf, out, len);
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR(usecp256k1_ec_pubkey_serialize_obj, 1, usecp256k1_ec_pubkey_serialize);
@@ -164,7 +165,7 @@ STATIC mp_obj_t usecp256k1_ecdsa_signature_parse_compact(const mp_obj_t arg){
     vstr_init_len(&vstr, 64);
     memcpy((byte*)vstr.buf, sig.data, 64);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ecdsa_signature_parse_compact_obj, usecp256k1_ecdsa_signature_parse_compact);
@@ -184,7 +185,7 @@ STATIC mp_obj_t usecp256k1_ecdsa_signature_parse_der(const mp_obj_t arg){
     vstr_init_len(&vstr, 64);
     memcpy((byte*)vstr.buf, sig.data, 64);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ecdsa_signature_parse_der_obj, usecp256k1_ecdsa_signature_parse_der);
@@ -211,7 +212,7 @@ STATIC mp_obj_t usecp256k1_ecdsa_signature_serialize_der(const mp_obj_t arg){
     vstr_init_len(&vstr, len);
     memcpy((byte*)vstr.buf, out, len);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ecdsa_signature_serialize_der_obj, usecp256k1_ecdsa_signature_serialize_der);
@@ -230,7 +231,7 @@ STATIC mp_obj_t usecp256k1_ecdsa_signature_serialize_compact(const mp_obj_t arg)
     vstr_t vstr;
     vstr_init_len(&vstr, 64);
     secp256k1_ecdsa_signature_serialize_compact(ctx, (byte*)vstr.buf, &sig);
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ecdsa_signature_serialize_compact_obj, usecp256k1_ecdsa_signature_serialize_compact);
@@ -288,7 +289,7 @@ STATIC mp_obj_t usecp256k1_ecdsa_signature_normalize(const mp_obj_t arg){
     vstr_init_len(&vstr, 64);
     secp256k1_ecdsa_signature_normalize(ctx, &sig2, &sig);
     memcpy(vstr.buf, sig2.data, 64);
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ecdsa_signature_normalize_obj, usecp256k1_ecdsa_signature_normalize);
@@ -336,7 +337,7 @@ STATIC mp_obj_t usecp256k1_nonce_function_default(mp_uint_t n_args, const mp_obj
         mp_raise_ValueError(MP_ERROR_TEXT("Failed to calculate nonce"));
         return mp_const_none;
     }
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &nonce);
+    return mp_obj_new_bytes_from_vstr(&nonce);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR(usecp256k1_nonce_function_default_obj, 2, usecp256k1_nonce_function_default);
 
@@ -445,7 +446,7 @@ STATIC mp_obj_t usecp256k1_ecdsa_sign(mp_uint_t n_args, const mp_obj_t *args){
     vstr_init_len(&vstr, 64);
     memcpy((byte*)vstr.buf, sig.data, 64);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR(usecp256k1_ecdsa_sign_obj, 2, usecp256k1_ecdsa_sign);
 
@@ -487,7 +488,7 @@ STATIC mp_obj_t usecp256k1_ec_privkey_negate(mp_obj_t arg){
         mp_raise_ValueError(MP_ERROR_TEXT("Failed to negate the private key"));
         return mp_const_none;
     }
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ec_privkey_negate_obj, usecp256k1_ec_privkey_negate);
@@ -511,7 +512,7 @@ STATIC mp_obj_t usecp256k1_ec_pubkey_negate(mp_obj_t arg){
         mp_raise_ValueError(MP_ERROR_TEXT("Failed to negate the public key"));
         return mp_const_none;
     }
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_ec_pubkey_negate_obj, usecp256k1_ec_pubkey_negate);
@@ -569,7 +570,7 @@ STATIC mp_obj_t usecp256k1_ec_privkey_add(mp_obj_t privarg, const mp_obj_t tweak
         mp_raise_ValueError("Failed to tweak the private key");
         return mp_const_none;
     }
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &priv2);
+    return mp_obj_new_bytes_from_vstr(&priv2);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(usecp256k1_ec_privkey_add_obj, usecp256k1_ec_privkey_add);
@@ -632,7 +633,7 @@ STATIC mp_obj_t usecp256k1_ec_pubkey_add(mp_obj_t pubarg, const mp_obj_t tweakar
     vstr_t pubbuf2;
     vstr_init_len(&pubbuf2, 64);
     memcpy((byte*)pubbuf2.buf, pub.data, 64);
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &pubbuf2);
+    return mp_obj_new_bytes_from_vstr(&pubbuf2);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(usecp256k1_ec_pubkey_add_obj, usecp256k1_ec_pubkey_add);
@@ -726,7 +727,7 @@ STATIC mp_obj_t usecp256k1_ec_pubkey_combine(mp_uint_t n_args, const mp_obj_t *a
         free(pubkeys[i]);
     }
     free(pubkeys);
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR(usecp256k1_ec_pubkey_combine_obj, 2, usecp256k1_ec_pubkey_combine);
@@ -753,7 +754,7 @@ STATIC mp_obj_t usecp256k1_xonly_pubkey_from_pubkey(mp_obj_t arg){
     }
 
     mp_obj_t items[2];
-    items[0] = mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    items[0] = mp_obj_new_bytes_from_vstr(&vstr);
     items[1] = mp_obj_new_int(parity);
     return mp_obj_new_tuple(2, items);
 }
@@ -816,7 +817,7 @@ STATIC mp_obj_t usecp256k1_keypair_create(mp_obj_t arg){
         return mp_const_none;
     }
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(usecp256k1_keypair_create_obj, usecp256k1_keypair_create);
 
@@ -881,7 +882,7 @@ STATIC mp_obj_t usecp256k1_schnorrsig_sign(mp_uint_t n_args, const mp_obj_t *arg
     vstr_init_len(&vstr, 64);
     memcpy((byte*)vstr.buf, sig, 64);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR(usecp256k1_schnorrsig_sign_obj, 2, usecp256k1_schnorrsig_sign);
@@ -938,7 +939,7 @@ STATIC mp_obj_t usecp256k1_ecdsa_sign_recoverable(mp_uint_t n_args, const mp_obj
     vstr_init_len(&vstr, 65);
     memcpy((byte*)vstr.buf, sig.data, 65);
 
-    return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+    return mp_obj_new_bytes_from_vstr(&vstr);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR(usecp256k1_ecdsa_sign_recoverable_obj, 2, usecp256k1_ecdsa_sign_recoverable);
 
@@ -990,4 +991,4 @@ const mp_obj_module_t secp256k1_user_cmodule = {
 };
 
 // Register the module to make it available in Python
-MP_REGISTER_MODULE(MP_QSTR_secp256k1, secp256k1_user_cmodule, MODULE_SECP256K1_ENABLED);
+MP_REGISTER_MODULE(MP_QSTR_secp256k1, secp256k1_user_cmodule);
